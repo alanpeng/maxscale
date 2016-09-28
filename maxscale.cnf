@@ -1,0 +1,56 @@
+[maxscale]
+threads=1
+
+[Splitter Service]
+type=service
+router=readwritesplit
+servers=MasterNode, SlaveNode1
+user=repluser
+passwd=88888888
+max_slave_replication_lag=30
+
+[Splitter Listener]
+type=listener
+service=Splitter Service
+protocol=MySQLClient
+port=3306
+socket=/tmp/ClusterMaster
+
+[MasterNode]
+type=server
+address=10.42.254.99
+port=3306
+protocol=MySQLBackend
+
+[SlaveNode1]
+type=server
+address=10.42.254.10
+port=3306
+protocol=MySQLBackend
+
+[SlaveNode2]
+type=server
+address=10.42.254.20
+port=3306
+protocol=MySQLBackend
+
+[Replication Monitor]
+type=monitor
+module=mysqlmon
+servers=MasterNode, SlaveNode1, SlaveNode2
+user=repluser
+passwd=88888888
+monitor_interval=1000
+detect_replication_lag=true
+detect_stale_master=true
+
+[CLI]
+type=service
+router=cli
+
+[CLI Listener]
+type=listener
+service=CLI
+protocol=maxscaled
+address=localhost
+port=6603
